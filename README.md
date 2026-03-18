@@ -48,7 +48,7 @@ sudo apt install ros-humble-pcl-ros ros-humble-rviz2 ros-humble-tf2-ros
 If cloning the parent repository:
 
 ```bash
-git clone --recurse-submodules <blueboat_cirtesu_repo_url>
+git clone --recurse-submodules https://github.com/Mariolopez31/blueboat_cirtesu.git
 ```
 
 If already cloned:
