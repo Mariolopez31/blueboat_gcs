@@ -5,13 +5,16 @@ import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
+from launch.substitutions import Command
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
     pkg_share = get_package_share_directory("blueboat_gcs")
+    description_pkg = get_package_share_directory("blueboat_cirtesu_description")
 
     rviz_config = os.path.join(pkg_share, "rviz", "blueboat_gcs.rviz")
-    pcd_file = os.path.join(pkg_share, "maps", "map1_centered.pcd")
+    blueboat_xacro = os.path.join(description_pkg, "urdf", "blueboat_enu_real.xacro")
 
     map_to_cirtesu = Node(
         package="tf2_ros",
@@ -21,19 +24,22 @@ def generate_launch_description():
         output="screen",
     )
 
-    cirtesu_pcd = Node(
-        package="pcl_ros",
-        executable="pcd_to_pointcloud",
-        name="cirtesu_pcd_publisher",
+    robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        name="blueboat_robot_state_publisher",
         output="screen",
         parameters=[{
-            "file_name": pcd_file,
-            "tf_frame": "map",
-            "interval": 1.0,
+            "robot_description": ParameterValue(
+                Command([
+                    "xacro ",
+                    blueboat_xacro,
+                    " environment:=sim",
+                    " lookup_csv:="
+                ]),
+                value_type=str
+            )
         }],
-        remappings=[
-            ("cloud_pcd", "/map_pointcloud")
-        ]
     )
 
     cirtesu_mesh = Node(
@@ -54,7 +60,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         map_to_cirtesu,
-        cirtesu_pcd,
+        robot_state_publisher,
         cirtesu_mesh,
         rviz,
     ])
