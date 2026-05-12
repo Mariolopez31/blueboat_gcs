@@ -11,6 +11,7 @@ install(
 
 install(
   DIRECTORY
+    config
     launch
     rviz
     maps
